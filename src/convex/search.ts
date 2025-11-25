@@ -12,10 +12,9 @@ export const performSearch = action({
   args: {
     query: v.string(),
     models: v.array(v.string()),
-    apiKeys: v.optional(v.record(v.string(), v.string())), // For BYOK
   },
   handler: async (ctx, args): Promise<Id<"searches">> => {
-    const { query, models, apiKeys } = args;
+    const { query, models } = args;
 
     // 1. Create search entry
     const searchId: Id<"searches"> = await ctx.runMutation(internal.searchData.createSearch, {
@@ -25,12 +24,12 @@ export const performSearch = action({
     });
 
     // 2. Define model handlers
-    const modelHandlers: Record<string, (q: string, k: string) => Promise<ModelResponse>> = {
-      "gpt-4o-mini": (q, k) => fetchOpenAI(q, k || process.env.OPENAI_API_KEY || "", "gpt-4o-mini"),
-      "gemini-1.5-flash": (q, k) => fetchGemini(q, k || process.env.GEMINI_API_KEY || "", "gemini-1.5-flash"),
-      "llama-3.1-70b": (q, k) => fetchGroq(q, k || process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"),
-      "mixtral-8x7b": (q, k) => fetchGroq(q, k || process.env.GROQ_API_KEY || "", "mixtral-8x7b-32768"),
-      "deepseek-r1": (q, k) => fetchGroq(q, k || process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"), // Placeholder using Groq for now as DeepSeek API varies
+    const modelHandlers: Record<string, (q: string) => Promise<ModelResponse>> = {
+      "gpt-4o-mini": (q) => fetchOpenAI(q, process.env.OPENAI_API_KEY || "", "gpt-4o-mini"),
+      "gemini-1.5-flash": (q) => fetchGemini(q, process.env.GEMINI_API_KEY || "", "gemini-1.5-flash"),
+      "llama-3.1-70b": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"),
+      "mixtral-8x7b": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "mixtral-8x7b-32768"),
+      "deepseek-r1": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"), // Placeholder using Groq for now as DeepSeek API varies
     };
 
     // 3. Run parallel requests
@@ -48,11 +47,8 @@ export const performSearch = action({
         return null;
       }
 
-      // Get API key from args (BYOK) or env
-      const key = apiKeys?.[modelId] || "";
-      
       // Execute
-      const result = await handler(query, key);
+      const result = await handler(query);
 
       // Store result
       await ctx.runMutation(internal.searchData.addResult, {

@@ -4,12 +4,11 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowRight, Settings } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "./ModelSelector";
 import { ResultCard } from "./ResultCard";
 import { FusionAnswer } from "./FusionAnswer";
 import { HistorySidebar } from "./HistorySidebar";
-import { SettingsModal } from "./SettingsModal";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -18,7 +17,6 @@ export default function SearchInterface() {
   const [isSearching, setIsSearching] = useState(false);
   const [currentSearchId, setCurrentSearchId] = useState<Id<"searches"> | null>(null);
   const [selectedModels, setSelectedModels] = useState<string[]>(["gpt-4o-mini", "gemini-1.5-flash", "llama-3.1-70b"]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   
   const { isAuthenticated } = useAuth();
   const performSearch = useAction(api.search.performSearch);
@@ -41,25 +39,10 @@ export default function SearchInterface() {
 
     setIsSearching(true);
     
-    // Get API keys from local storage
-    const storedKeys = localStorage.getItem("vly_api_keys");
-    const apiKeys = storedKeys ? JSON.parse(storedKeys) : {};
-    
-    // Map keys to model IDs
-    const keysForRequest: Record<string, string> = {};
-    if (apiKeys.openai) keysForRequest["gpt-4o-mini"] = apiKeys.openai;
-    if (apiKeys.gemini) keysForRequest["gemini-1.5-flash"] = apiKeys.gemini;
-    if (apiKeys.groq) {
-      keysForRequest["llama-3.1-70b"] = apiKeys.groq;
-      keysForRequest["mixtral-8x7b"] = apiKeys.groq;
-      keysForRequest["deepseek-r1"] = apiKeys.groq;
-    }
-
     try {
       const id = await performSearch({
         query,
         models: selectedModels,
-        apiKeys: keysForRequest,
       });
       setCurrentSearchId(id);
     } catch (error) {
@@ -80,12 +63,6 @@ export default function SearchInterface() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-4 flex flex-col min-h-[calc(100vh-4rem)] relative">
       {/* Top Bar */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        <Button variant="outline" size="sm" className="gap-2 shadow-sm" onClick={() => setSettingsOpen(true)}>
-          <Settings className="h-4 w-4" />
-          <span className="hidden sm:inline">API Keys</span>
-        </Button>
-      </div>
       
       {isAuthenticated && (
         <div className="absolute top-4 left-4">
@@ -95,8 +72,6 @@ export default function SearchInterface() {
           />
         </div>
       )}
-
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
 
       {/* Search Header */}
       <div className={`transition-all duration-500 ease-in-out flex flex-col items-center ${currentSearchId ? "py-4 mt-8" : "py-20 mt-12"}`}>
