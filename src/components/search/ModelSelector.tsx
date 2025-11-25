@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export const AVAILABLE_MODELS = [
   { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI" },
-  { id: "gemini-1.5-flash", name: "Gemini Flash 2.0", provider: "Google" },
+  { id: "gemini-2.0-flash", name: "Gemini Flash 2.0", provider: "Google" },
   { id: "llama-3.1-70b", name: "Llama 3.1", provider: "Groq" },
   { id: "mixtral-8x7b", name: "Mixtral 8x7b", provider: "Groq" },
   { id: "deepseek-r1", name: "DeepSeek R1", provider: "DeepSeek" },

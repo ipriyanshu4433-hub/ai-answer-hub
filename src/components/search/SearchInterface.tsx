@@ -16,7 +16,7 @@ export default function SearchInterface() {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [currentSearchId, setCurrentSearchId] = useState<Id<"searches"> | null>(null);
-  const [selectedModels, setSelectedModels] = useState<string[]>(["gpt-4o-mini", "gemini-1.5-flash", "llama-3.1-70b"]);
+  const [selectedModels, setSelectedModels] = useState<string[]>(["gpt-4o-mini", "gemini-2.0-flash", "llama-3.1-70b"]);
   
   const { isAuthenticated } = useAuth();
   const performSearch = useAction(api.search.performSearch);

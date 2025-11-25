@@ -10,6 +10,7 @@ import { Id } from "./_generated/dataModel";
 const MODEL_MAP: Record<string, string> = {
   "gpt-4o-mini": "openai/gpt-4o-mini",
   "gemini-1.5-flash": "google/gemini-flash-1.5",
+  "gemini-2.0-flash": "google/gemini-2.0-flash-exp",
   "llama-3.1-70b": "meta-llama/llama-3.1-70b-instruct",
   "mixtral-8x7b": "mistralai/mixtral-8x7b-instruct",
   "deepseek-r1": "deepseek/deepseek-r1",
