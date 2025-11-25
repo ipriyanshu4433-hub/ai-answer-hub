@@ -81,8 +81,9 @@ export default function SearchInterface() {
     <div className="w-full max-w-7xl mx-auto px-4 py-4 flex flex-col min-h-[calc(100vh-4rem)] relative">
       {/* Top Bar */}
       <div className="absolute top-4 right-4 flex gap-2">
-        <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
-          <Settings className="h-5 w-5" />
+        <Button variant="outline" size="sm" className="gap-2 shadow-sm" onClick={() => setSettingsOpen(true)}>
+          <Settings className="h-4 w-4" />
+          <span className="hidden sm:inline">API Keys</span>
         </Button>
       </div>
       

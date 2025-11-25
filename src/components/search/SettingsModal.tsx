@@ -45,12 +45,12 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             API Settings (BYOK)
           </DialogTitle>
           <DialogDescription>
-            Enter your own API keys to use the models. Keys are stored locally in your browser.
+            Enter your own API keys to use the models. Keys are stored locally in your browser and are never sent to our servers except to perform the search.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="openai">OpenAI API Key</Label>
+            <Label htmlFor="openai">OpenAI API Key <span className="text-xs text-muted-foreground font-normal">(for GPT-4o Mini)</span></Label>
             <Input
               id="openai"
               type="password"
@@ -60,7 +60,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="gemini">Google Gemini API Key</Label>
+            <Label htmlFor="gemini">Google Gemini API Key <span className="text-xs text-muted-foreground font-normal">(for Gemini Flash 2.0)</span></Label>
             <Input
               id="gemini"
               type="password"
@@ -70,7 +70,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="groq">Groq API Key</Label>
+            <Label htmlFor="groq">Groq API Key <span className="text-xs text-muted-foreground font-normal">(for Llama 3.1, Mixtral, DeepSeek R1)</span></Label>
             <Input
               id="groq"
               type="password"
