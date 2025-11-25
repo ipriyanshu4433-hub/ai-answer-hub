@@ -77,7 +77,7 @@ export default function SearchInterface() {
       <div className={`transition-all duration-500 ease-in-out flex flex-col items-center ${currentSearchId ? "py-4 mt-8" : "py-20 mt-12"}`}>
         <h1 className={`font-bold tracking-tight text-center mb-8 transition-all ${currentSearchId ? "text-2xl" : "text-4xl md:text-6xl"}`}>
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-            AI Meta Search
+            Fusion AI
           </span>
         </h1>
         

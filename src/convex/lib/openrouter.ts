@@ -13,7 +13,7 @@ export async function fetchOpenRouter(
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
         "HTTP-Referer": "https://vly.ai", // Required by OpenRouter
-        "X-Title": "AI Answer Hub", // Optional
+        "X-Title": "Fusion AI", // Optional
       },
       body: JSON.stringify({
         model: model,
