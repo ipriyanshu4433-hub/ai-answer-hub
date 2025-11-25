@@ -18,14 +18,18 @@ export async function fetchGemini(
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
     const latency = Date.now() - start;
 
     if (!response.ok) {
-      throw new Error(data.error?.message || "Gemini API Error");
+      throw new Error(data?.error?.message || response.statusText || "Gemini API Error");
     }
 
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+    if (!content && !data.error) {
+       throw new Error("Empty response from Gemini");
+    }
     
     return {
       content,

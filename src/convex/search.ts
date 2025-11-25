@@ -44,8 +44,20 @@ export const performSearch = action({
       
       // Route Gemini models to Google directly to distribute load
       if (modelId.includes("gemini")) {
-        const googleModel = modelId === "gemini-2.0-flash" ? "gemini-2.0-flash-exp" : "gemini-1.5-flash";
+        // Try direct Google API first with the stable model name
+        const googleModel = modelId === "gemini-2.0-flash" ? "gemini-2.0-flash" : "gemini-1.5-flash";
         result = await fetchGemini(query, GOOGLE_KEY, googleModel);
+
+        // Fallback to OpenRouter if Google API fails (e.g. rate limit, invalid key, model not found)
+        if (result.error) {
+          console.log(`Gemini Direct API failed for ${modelId}, falling back to OpenRouter. Error: ${result.error}`);
+          const openRouterModelId = MODEL_MAP[modelId];
+          
+          if (openRouterModelId) {
+            const apiKey = OPENROUTER_KEYS[Math.floor(Math.random() * OPENROUTER_KEYS.length)];
+            result = await fetchOpenRouter(query, apiKey, openRouterModelId);
+          }
+        }
       } else {
         // Use OpenRouter for others with key rotation
         const openRouterModelId = MODEL_MAP[modelId];
