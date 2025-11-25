@@ -19,6 +19,7 @@ import type * as http from "../http.js";
 import type * as lib_gemini from "../lib/gemini.js";
 import type * as lib_groq from "../lib/groq.js";
 import type * as lib_openai from "../lib/openai.js";
+import type * as lib_openrouter from "../lib/openrouter.js";
 import type * as lib_types from "../lib/types.js";
 import type * as search from "../search.js";
 import type * as searchData from "../searchData.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   "lib/gemini": typeof lib_gemini;
   "lib/groq": typeof lib_groq;
   "lib/openai": typeof lib_openai;
+  "lib/openrouter": typeof lib_openrouter;
   "lib/types": typeof lib_types;
   search: typeof search;
   searchData: typeof searchData;

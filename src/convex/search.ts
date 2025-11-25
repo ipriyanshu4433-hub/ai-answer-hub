@@ -2,11 +2,21 @@
 import { action } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { fetchOpenAI } from "./lib/openai";
-import { fetchGemini } from "./lib/gemini";
-import { fetchGroq } from "./lib/groq";
+import { fetchOpenRouter } from "./lib/openrouter";
 import { ModelResponse } from "./lib/types";
 import { Id } from "./_generated/dataModel";
+
+// Mapping from frontend model IDs to OpenRouter model IDs
+const MODEL_MAP: Record<string, string> = {
+  "gpt-4o-mini": "openai/gpt-4o-mini",
+  "gemini-1.5-flash": "google/gemini-flash-1.5",
+  "llama-3.1-70b": "meta-llama/llama-3.1-70b-instruct",
+  "mixtral-8x7b": "mistralai/mixtral-8x7b-instruct",
+  "deepseek-r1": "deepseek/deepseek-r1",
+};
+
+// TODO: Move this key to Convex Environment Variables (OPENROUTER_API_KEY) for security
+const FALLBACK_KEY = "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";
 
 export const performSearch = action({
   args: {
@@ -15,27 +25,19 @@ export const performSearch = action({
   },
   handler: async (ctx, args): Promise<Id<"searches">> => {
     const { query, models } = args;
+    const apiKey = process.env.OPENROUTER_API_KEY || FALLBACK_KEY;
 
     // 1. Create search entry
     const searchId: Id<"searches"> = await ctx.runMutation(internal.searchData.createSearch, {
       query,
       sources: models,
-      // userId: ... (can be added if we get auth context)
     });
 
-    // 2. Define model handlers
-    const modelHandlers: Record<string, (q: string) => Promise<ModelResponse>> = {
-      "gpt-4o-mini": (q) => fetchOpenAI(q, process.env.OPENAI_API_KEY || "", "gpt-4o-mini"),
-      "gemini-1.5-flash": (q) => fetchGemini(q, process.env.GEMINI_API_KEY || "", "gemini-1.5-flash"),
-      "llama-3.1-70b": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"),
-      "mixtral-8x7b": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "mixtral-8x7b-32768"),
-      "deepseek-r1": (q) => fetchGroq(q, process.env.GROQ_API_KEY || "", "llama-3.1-70b-versatile"), // Placeholder using Groq for now as DeepSeek API varies
-    };
-
-    // 3. Run parallel requests
+    // 2. Run parallel requests using OpenRouter
     const promises = models.map(async (modelId) => {
-      const handler = modelHandlers[modelId];
-      if (!handler) {
+      const openRouterModelId = MODEL_MAP[modelId];
+      
+      if (!openRouterModelId) {
         await ctx.runMutation(internal.searchData.addResult, {
           searchId,
           modelId,
@@ -48,7 +50,7 @@ export const performSearch = action({
       }
 
       // Execute
-      const result = await handler(query);
+      const result = await fetchOpenRouter(query, apiKey, openRouterModelId);
 
       // Store result
       await ctx.runMutation(internal.searchData.addResult, {
@@ -66,15 +68,15 @@ export const performSearch = action({
 
     const results = (await Promise.all(promises)).filter((r): r is ModelResponse => r !== null && !r.error);
 
-    // 4. Generate Fusion Answer
+    // 3. Generate Fusion Answer
     if (results.length > 0) {
       const combinedText = results.map((r, i) => `Response ${i + 1}:\n${r.content}`).join("\n\n---\n\n");
       const fusionPrompt = `You are an expert synthesizer. Combine the following AI responses into a single, comprehensive, and accurate answer. Highlight the best parts of each. \n\nQuery: ${query}\n\n${combinedText}`;
       
-      const fusionResult = await fetchOpenAI(fusionPrompt, process.env.OPENAI_API_KEY || "", "gpt-4o-mini");
+      // Use OpenRouter (GPT-4o Mini) for fusion as well
+      const fusionResult = await fetchOpenRouter(fusionPrompt, apiKey, "openai/gpt-4o-mini");
       
-      // Calculate simple confidence score (mock logic for now)
-      // In a real app, we'd compare semantic similarity
+      // Calculate simple confidence score (mock logic)
       const confidenceScore = Math.min(95, 70 + (results.length * 5)); 
 
       await ctx.runMutation(internal.searchData.updateFusionAnswer, {
